@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.math.BigInteger;
 
 @RestController
 @RequestMapping("/api/monitor")
@@ -25,7 +26,7 @@ public class MonitorController {
         }
         StringBuilder sb = new StringBuilder();
         for (File file : File.listRoots()) {
-            sb.append(file.toString() + " - drive: " + file.toString() + " total:" + file.getTotalSpace() + " usable:" + file.getUsableSpace() + " free:" + file.getFreeSpace() + "\n");
+            sb.append(file.toString() + " - drive: " + hex(file.toString()) + " total:" + file.getTotalSpace() + " usable:" + file.getUsableSpace() + " free:" + file.getFreeSpace() + "\n");
         }
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
@@ -42,7 +43,7 @@ public class MonitorController {
             thresholdPercentage = 20;
         }
         for (File file : File.listRoots()) {
-            if (file.toString().equals(drive)) {
+            if (hex(file.toString()).equals(drive)) {
                 if (thresholdSize != null) {
                     long value = file.getFreeSpace();
                     if (value < thresholdSize) {
@@ -64,6 +65,10 @@ public class MonitorController {
             }
         }
         return new ResponseEntity<>("Error: could not find drive", HttpStatus.BAD_REQUEST);
+    }
+
+    protected String hex(String text) {
+        return String.format("%x", new BigInteger(1, text.getBytes()));
     }
 }
 
